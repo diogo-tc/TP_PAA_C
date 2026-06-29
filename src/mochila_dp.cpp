@@ -2,39 +2,48 @@
 
 #include <unordered_map>
 
+// Representa um estado da DP, guardando valor e ponteiro para reconstruir a solucao.
 struct State {
     long long value;
     int node;
 };
 
+// Guarda a ligacao entre uma escolha feita e o estado anterior.
 struct ParentNode {
     int itemIndex;
     int previous;
 };
 
+// Empacota peso e volume em uma chave unica para usar no mapa de estados.
 static std::uint64_t makeKey(int weight, int volume) {
     return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(weight)) << 32)
            | static_cast<std::uint32_t>(volume);
 }
 
+// Recupera o peso armazenado em uma chave de estado.
 static int keyWeight(std::uint64_t key) {
     return static_cast<int>(key >> 32);
 }
 
+// Recupera o volume armazenado em uma chave de estado.
 static int keyVolume(std::uint64_t key) {
     return static_cast<int>(key & 0xffffffffu);
 }
 
+// Estrutura auxiliar para consultar rapidamente dominancia por volume e valor.
 class FenwickMax {
 public:
+    // Inicializa a arvore Fenwick com valores sentinela.
     explicit FenwickMax(int n) : tree(n + 1, -1) {}
 
+    // Atualiza o melhor valor conhecido para um indice de volume.
     void update(int index, long long value) {
         for (++index; index < static_cast<int>(tree.size()); index += index & -index) {
             tree[index] = std::max(tree[index], value);
         }
     }
 
+    // Consulta o maior valor ate um indice de volume.
     long long query(int index) const {
         long long best = -1;
         for (++index; index > 0; index -= index & -index) {
@@ -47,6 +56,7 @@ private:
     std::vector<long long> tree;
 };
 
+// Remove estados dominados para reduzir memoria e tempo da programacao dinamica.
 static void pruneDominated(std::unordered_map<std::uint64_t, State> &states, int capacityVolume) {
     struct Entry {
         int weight;
@@ -83,6 +93,7 @@ static void pruneDominated(std::unordered_map<std::uint64_t, State> &states, int
     }
 }
 
+// Resolve a mochila usando programacao dinamica com estados esparsos.
 static Solution solveDP(const Instance &inst) {
     auto start = std::chrono::steady_clock::now();
 
@@ -142,6 +153,7 @@ static Solution solveDP(const Instance &inst) {
     return sol;
 }
 
+// Le a instancia, executa a programacao dinamica e imprime a solucao.
 int main(int argc, char **argv) {
     if (argc != 2) {
         std::cerr << "Uso: " << argv[0] << " <arquivo_instancia>\n";

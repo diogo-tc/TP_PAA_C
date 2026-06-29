@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+// Representa um item da mochila com indice, peso, volume e valor.
 struct Item {
     int index;
     int weight;
@@ -19,18 +20,21 @@ struct Item {
     int value;
 };
 
+// Armazena uma instancia completa do problema lida de arquivo.
 struct Instance {
     int capacityWeight;
     int capacityVolume;
     std::vector<Item> items;
 };
 
+// Guarda o resultado de um algoritmo: lucro, itens escolhidos e tempo.
 struct Solution {
     long long profit = 0;
     std::vector<int> chosen;
     double seconds = 0.0;
 };
 
+// Le uma instancia no formato W V seguido de peso, volume e valor dos itens.
 inline Instance readInstance(const std::string &path) {
     std::ifstream in(path);
     if (!in) {
@@ -57,10 +61,12 @@ inline Instance readInstance(const std::string &path) {
     return inst;
 }
 
+// Ordena os indices dos itens escolhidos antes de exibir ou salvar.
 inline void sortChosen(std::vector<int> &chosen) {
     std::sort(chosen.begin(), chosen.end());
 }
 
+// Imprime a solucao em um formato padronizado para todos os algoritmos.
 inline void printSolution(const std::string &algorithm, Solution sol) {
     sortChosen(sol.chosen);
     std::cout << "Algoritmo: " << algorithm << "\n";
@@ -78,17 +84,20 @@ inline void printSolution(const std::string &algorithm, Solution sol) {
               << "Tempo: " << sol.seconds << " segundos\n";
 }
 
+// Calcula o tempo decorrido em segundos entre dois instantes.
 inline double elapsedSeconds(std::chrono::steady_clock::time_point start,
                              std::chrono::steady_clock::time_point end) {
     return std::chrono::duration<double>(end - start).count();
 }
 
+// Calcula uma densidade aproximada considerando peso e volume relativos.
 inline double normalizedDensity(const Item &item, int capacityWeight, int capacityVolume) {
     const double w = capacityWeight > 0 ? static_cast<double>(item.weight) / capacityWeight : item.weight;
     const double v = capacityVolume > 0 ? static_cast<double>(item.volume) / capacityVolume : item.volume;
     return static_cast<double>(item.value) / (w + v);
 }
 
+// Soma os valores dos itens a partir de uma posicao.
 inline long long totalValueFrom(const std::vector<Item> &items, int start) {
     long long total = 0;
     for (int i = start; i < static_cast<int>(items.size()); ++i) {

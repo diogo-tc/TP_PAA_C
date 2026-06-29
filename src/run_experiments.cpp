@@ -10,6 +10,7 @@
 #define pclose _pclose
 #endif
 
+// Converte uma lista separada por virgulas em vetor de inteiros.
 static std::vector<int> parseList(const std::string &text) {
     std::vector<int> values;
     std::stringstream ss(text);
@@ -25,10 +26,12 @@ static std::vector<int> parseList(const std::string &text) {
     return values;
 }
 
+// Coloca aspas duplas em caminhos usados nos comandos externos.
 static std::string quote(const std::string &path) {
     return "\"" + path + "\"";
 }
 
+// Ajusta o diretorio atual para a raiz do projeto quando executado a partir de build.
 static void enterProjectRoot(const char *programPath) {
     std::filesystem::path path(programPath);
     if (!path.has_parent_path()) {
@@ -41,6 +44,7 @@ static void enterProjectRoot(const char *programPath) {
     }
 }
 
+// Executa um comando e captura toda a saida padrao produzida por ele.
 static std::string runAndCapture(const std::string &command) {
     FILE *pipe = popen(command.c_str(), "r");
     if (!pipe) {
@@ -60,6 +64,7 @@ static std::string runAndCapture(const std::string &command) {
     return output;
 }
 
+// Extrai o lucro maximo da saida textual de um algoritmo.
 static long long parseProfit(const std::string &output) {
     std::istringstream in(output);
     std::string line;
@@ -72,6 +77,7 @@ static long long parseProfit(const std::string &output) {
     throw std::runtime_error("Lucro maximo nao encontrado na saida:\n" + output);
 }
 
+// Extrai o tempo de execucao da saida textual de um algoritmo.
 static double parseTime(const std::string &output) {
     std::istringstream in(output);
     std::string line;
@@ -87,6 +93,7 @@ static double parseTime(const std::string &output) {
     throw std::runtime_error("Tempo nao encontrado na saida:\n" + output);
 }
 
+// Extrai a lista de itens escolhidos da saida textual de um algoritmo.
 static std::string parseChosenItems(const std::string &output) {
     std::istringstream in(output);
     std::string line;
@@ -106,6 +113,7 @@ static std::string parseChosenItems(const std::string &output) {
     throw std::runtime_error("Itens escolhidos nao encontrados na saida:\n" + output);
 }
 
+// Escapa texto para ser escrito com seguranca em uma celula CSV.
 static std::string csvText(const std::string &text) {
     std::string escaped = "\"";
     for (char c : text) {
@@ -119,6 +127,7 @@ static std::string csvText(const std::string &text) {
     return escaped;
 }
 
+// Gera uma instancia aleatoria usada pelos experimentos automatizados.
 static void generateInstance(const std::string &path, int n, int w, int v, unsigned seed) {
     const std::filesystem::path parent = std::filesystem::path(path).parent_path();
     if (!parent.empty()) {
@@ -140,11 +149,13 @@ static void generateInstance(const std::string &path, int n, int w, int v, unsig
     }
 }
 
+// Exibe o modo de uso do runner de experimentos.
 static void usage(const char *program) {
     std::cerr
         << "Uso: " << program << " --n 10,20 --w 50,100 --v 50,100 --out resultados.csv [--reps 10] [--seed 123]\n";
 }
 
+// Processa os parametros, gera instancias, executa algoritmos e grava o CSV.
 int main(int argc, char **argv) {
     if (argc > 0) {
         enterProjectRoot(argv[0]);

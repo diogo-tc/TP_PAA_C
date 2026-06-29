@@ -4,6 +4,7 @@
 #include <random>
 #include <string>
 
+// Le um numero inteiro do usuario, repetindo a pergunta ate receber valor valido.
 static int readInt(const std::string &label, int minValue = 1) {
     while (true) {
         std::cout << label;
@@ -22,6 +23,7 @@ static int readInt(const std::string &label, int minValue = 1) {
     }
 }
 
+// Le um texto do usuario e usa um valor padrao quando a entrada fica vazia.
 static std::string readText(const std::string &label, const std::string &defaultValue = "") {
     std::cout << label;
     if (!defaultValue.empty()) {
@@ -37,10 +39,12 @@ static std::string readText(const std::string &label, const std::string &default
     return value;
 }
 
+// Coloca aspas simples ao redor de um texto para montar comandos de terminal.
 static std::string quote(const std::string &value) {
     return "'" + value + "'";
 }
 
+// Executa um comando externo e mostra uma mensagem caso ele falhe.
 static int runCommand(const std::string &command) {
     std::cout << "\nExecutando: " << command << "\n\n";
     int status = std::system(command.c_str());
@@ -51,6 +55,7 @@ static int runCommand(const std::string &command) {
     return status;
 }
 
+// Ajusta o diretorio atual para a raiz do projeto quando o menu roda a partir de build.
 static void enterProjectRoot(const char *programPath) {
     std::filesystem::path path(programPath);
     if (path.has_parent_path()) {
@@ -61,6 +66,7 @@ static void enterProjectRoot(const char *programPath) {
     }
 }
 
+// Converte a opcao numerica do menu no executavel do algoritmo correspondente.
 static std::string algorithmExecutable(int option) {
     switch (option) {
         case 1: return "./build/mochila_dp";
@@ -70,6 +76,7 @@ static std::string algorithmExecutable(int option) {
     }
 }
 
+// Coleta parametros no menu e chama o gerador de instancias.
 static void generateInstance() {
     const std::string path = readText("Arquivo de saida", "instances/manual.txt");
     const int n = readInt("Quantidade de itens: ");
@@ -92,6 +99,7 @@ static void generateInstance() {
     runCommand(command);
 }
 
+// Permite escolher e executar um unico algoritmo sobre uma instancia.
 static void runOneAlgorithm() {
     std::cout << "Algoritmo 1: Programacao dinamica\n";
     std::cout << "Algoritmo 2: Backtracking com poda\n";
@@ -106,6 +114,7 @@ static void runOneAlgorithm() {
     runCommand(algorithmExecutable(algorithm) + " " + quote(instance));
 }
 
+// Executa os tres algoritmos sobre a mesma instancia.
 static void runAllAlgorithms() {
     const std::string instance = readText("Arquivo da instancia", "instances/manual.txt");
     for (int algorithm = 1; algorithm <= 3; ++algorithm) {
@@ -113,6 +122,7 @@ static void runAllAlgorithms() {
     }
 }
 
+// Coleta combinacoes de n, W e V e chama o runner para gerar o CSV.
 static void runCsvExperiment() {
     std::cout << "Use listas separadas por virgula para testar varias combinacoes.\n";
     std::cout << "Serao geradas 10 instancias aleatorias para cada combinacao n x W x V.\n";
@@ -129,6 +139,7 @@ static void runCsvExperiment() {
     runCommand(command);
 }
 
+// Mostra as opcoes principais da interface de terminal.
 static void printMenu() {
     std::cout << "========================================\n";
     std::cout << "Mochila 0-1 com duas restricoes\n";
@@ -140,6 +151,7 @@ static void printMenu() {
     std::cout << "0. Sair\n";
 }
 
+// Inicializa o menu e processa as opcoes ate o usuario sair.
 int main(int argc, char **argv) {
     if (argc > 0) {
         enterProjectRoot(argv[0]);

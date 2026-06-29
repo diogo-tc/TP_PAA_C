@@ -111,7 +111,7 @@ O CSV gerado contem:
 n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit
 ```
 
-## Analise estatistica e graficos
+## Analise estatistica, graficos e dashboard
 
 Instale as dependencias Python no WSL:
 
@@ -119,17 +119,30 @@ Instale as dependencias Python no WSL:
 python3 -m pip install -r requirements.txt
 ```
 
-Depois rode:
+Analise completa para um ou mais CSVs:
 
 ```bash
-python3 scripts/analyze_results.py results/resultados.csv --out-dir results/analysis
+python3 scripts/full_analysis.py Teste_100a500.csv 500itens_1milhaoPW.csv --out-dir analysis_output
 ```
 
 Saidas principais:
 
-- `summary.csv`: media, mediana, desvio padrao, minimo e maximo por combinacao
-- `statistical_tests.csv`: Friedman e Wilcoxon por combinacao
-- Graficos `.png` com crescimento de tempo
+- `analysis_output/dashboard.html`: dashboard estatico com tabelas e graficos
+- `analysis_output/tables/summary_by_combination.csv`: media, mediana, desvio padrao, minimo e maximo por combinacao
+- `analysis_output/tables/summary_global.csv`: resumo geral por algoritmo
+- `analysis_output/tables/mean_time_ratios.csv`: razoes de tempo entre algoritmos
+- `analysis_output/tables/fastest_by_combination.csv`: algoritmo mais rapido por combinacao
+- `analysis_output/tables/profit_consistency.csv`: verificacao se os algoritmos chegaram ao mesmo lucro
+- `analysis_output/tables/statistical_tests.csv`: testes Friedman e Wilcoxon
+- `analysis_output/plots/*.png`: graficos em escala logaritmica
+
+As tabelas geradas pela analise usam cabecalhos em portugues do Brasil, como `tempo_medio`, `tempo_mediano`, `desvio_padrao_tempo`, `algoritmo_mais_rapido` e `valor_p`.
+
+Tambem e possivel analisar todos os CSVs de um diretorio:
+
+```bash
+python3 scripts/full_analysis.py . --out-dir analysis_output
+```
 
 ## Observacao sobre branch-and-bound
 

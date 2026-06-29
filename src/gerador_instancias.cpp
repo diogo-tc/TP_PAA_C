@@ -3,11 +3,13 @@
 #include <filesystem>
 #include <random>
 
+// Exibe o modo de uso do gerador de instancias.
 static void usage(const char *program) {
     std::cerr << "Uso: " << program
               << " <saida.txt> <n> <W> <V> [seed] [peso_item_max] [volume_item_max] [valor_max]\n";
 }
 
+// Le os parametros, gera itens aleatorios e grava a instancia em arquivo.
 int main(int argc, char **argv) {
     if (argc < 5 || argc > 9) {
         usage(argv[0]);

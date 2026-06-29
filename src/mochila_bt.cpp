@@ -1,5 +1,6 @@
 #include "../include/common.hpp"
 
+// Implementa o resolvedor por backtracking com ordenacao e podas.
 struct BacktrackingSolver {
     Instance inst;
     std::vector<Item> items;
@@ -8,6 +9,7 @@ struct BacktrackingSolver {
     std::vector<int> bestChosen;
     std::vector<int> currentChosen;
 
+    // Prepara os itens ordenados e a soma de valores restantes para poda.
     explicit BacktrackingSolver(const Instance &instance) : inst(instance), items(instance.items) {
         std::sort(items.begin(), items.end(), [&](const Item &a, const Item &b) {
             return normalizedDensity(a, inst.capacityWeight, inst.capacityVolume)
@@ -20,6 +22,7 @@ struct BacktrackingSolver {
         }
     }
 
+    // Explora recursivamente incluir ou nao incluir cada item, aplicando podas.
     void search(int pos, int weight, int volume, long long value) {
         if (weight > inst.capacityWeight || volume > inst.capacityVolume) {
             return;
@@ -44,6 +47,7 @@ struct BacktrackingSolver {
         search(pos + 1, weight, volume, value);
     }
 
+    // Executa a busca completa e devolve a melhor solucao encontrada.
     Solution solve() {
         auto start = std::chrono::steady_clock::now();
         search(0, 0, 0, 0);
@@ -57,6 +61,7 @@ struct BacktrackingSolver {
     }
 };
 
+// Le a instancia, executa o backtracking e imprime a solucao.
 int main(int argc, char **argv) {
     if (argc != 2) {
         std::cerr << "Uso: " << argv[0] << " <arquivo_instancia>\n";

@@ -1,10 +1,12 @@
 #include "../include/common.hpp"
 
+// Associa um item a sua posicao na ordem principal da busca.
 struct BBItem {
     Item item;
     int orderPos;
 };
 
+// Implementa o resolvedor branch-and-bound com solucao inicial gulosa e podas.
 struct BranchAndBoundSolver {
     Instance inst;
     std::vector<Item> items;
@@ -15,6 +17,7 @@ struct BranchAndBoundSolver {
     std::vector<int> currentChosen;
     std::vector<int> bestChosen;
 
+    // Ordena os itens e prepara estruturas auxiliares para calcular limites superiores.
     explicit BranchAndBoundSolver(const Instance &instance) : inst(instance), items(instance.items) {
         std::sort(items.begin(), items.end(), [&](const Item &a, const Item &b) {
             return normalizedDensity(a, inst.capacityWeight, inst.capacityVolume)
@@ -43,6 +46,7 @@ struct BranchAndBoundSolver {
         });
     }
 
+    // Calcula um limite superior fracionario considerando apenas a restricao de peso.
     double boundByWeight(int pos, int remainingWeight, long long value) const {
         if (remainingWeight < 0) {
             return 0.0;
@@ -66,6 +70,7 @@ struct BranchAndBoundSolver {
         return bound;
     }
 
+    // Calcula um limite superior fracionario considerando apenas a restricao de volume.
     double boundByVolume(int pos, int remainingVolume, long long value) const {
         if (remainingVolume < 0) {
             return 0.0;
@@ -89,6 +94,7 @@ struct BranchAndBoundSolver {
         return bound;
     }
 
+    // Combina limites superiores para decidir se um ramo ainda pode melhorar a solucao.
     double upperBound(int pos, int weight, int volume, long long value) const {
         if (weight > inst.capacityWeight || volume > inst.capacityVolume) {
             return 0.0;
@@ -100,6 +106,7 @@ struct BranchAndBoundSolver {
         return std::min(byRemainingValue, std::min(byWeight, byVolume));
     }
 
+    // Constroi uma solucao inicial gulosa para aumentar o poder das podas.
     void greedyInitialSolution() {
         int weight = 0;
         int volume = 0;
@@ -120,6 +127,7 @@ struct BranchAndBoundSolver {
         bestChosen = chosen;
     }
 
+    // Explora a arvore de decisao incluindo ou ignorando itens, podando ramos ruins.
     void search(int pos, int weight, int volume, long long value) {
         if (weight > inst.capacityWeight || volume > inst.capacityVolume) {
             return;
@@ -150,6 +158,7 @@ struct BranchAndBoundSolver {
         search(pos + 1, weight, volume, value);
     }
 
+    // Executa a solucao gulosa inicial, a busca branch-and-bound e mede o tempo.
     Solution solve() {
         auto start = std::chrono::steady_clock::now();
 
@@ -165,11 +174,13 @@ struct BranchAndBoundSolver {
     }
 };
 
+// Cria o resolvedor branch-and-bound e retorna a solucao final.
 static Solution solveBranchAndBound(const Instance &inst) {
     BranchAndBoundSolver solver(inst);
     return solver.solve();
 }
 
+// Le a instancia, executa o branch-and-bound e imprime a solucao.
 int main(int argc, char **argv) {
     if (argc != 2) {
         std::cerr << "Uso: " << argv[0] << " <arquivo_instancia>\n";
