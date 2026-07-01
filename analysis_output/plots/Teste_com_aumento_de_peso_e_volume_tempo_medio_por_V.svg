@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="460.0" y="28" text-anchor="middle" font-family="Arial" font-size="18" font-weight="700">Tempo medio por volume - Teste_com_aumento_de_peso_e_volume.csv</text>
+<line x1="86" y1="54" x2="86" y2="444" stroke="#444"/>
+<line x1="86" y1="444" x2="892" y2="444" stroke="#444"/>
+<line x1="86" y1="54.0" x2="892" y2="54.0" stroke="#e5e7eb"/>
+<text x="76" y="58.0" text-anchor="end" font-family="Arial" font-size="11">0.0139</text>
+<line x1="86" y1="132.0" x2="892" y2="132.0" stroke="#e5e7eb"/>
+<text x="76" y="136.0" text-anchor="end" font-family="Arial" font-size="11">0.00764</text>
+<line x1="86" y1="210.0" x2="892" y2="210.0" stroke="#e5e7eb"/>
+<text x="76" y="214.0" text-anchor="end" font-family="Arial" font-size="11">0.00419</text>
+<line x1="86" y1="288.0" x2="892" y2="288.0" stroke="#e5e7eb"/>
+<text x="76" y="292.0" text-anchor="end" font-family="Arial" font-size="11">0.0023</text>
+<line x1="86" y1="366.0" x2="892" y2="366.0" stroke="#e5e7eb"/>
+<text x="76" y="370.0" text-anchor="end" font-family="Arial" font-size="11">0.00127</text>
+<line x1="86" y1="444.0" x2="892" y2="444.0" stroke="#e5e7eb"/>
+<text x="76" y="448.0" text-anchor="end" font-family="Arial" font-size="11">0.000695</text>
+<line x1="86.0" y1="444" x2="86.0" y2="449" stroke="#444"/>
+<text x="86.0" y="466" text-anchor="middle" font-family="Arial" font-size="11">100</text>
+<line x1="86.0" y1="444" x2="86.0" y2="449" stroke="#444"/>
+<text x="86.0" y="466" text-anchor="middle" font-family="Arial" font-size="11">1000</text>
+<line x1="86.0" y1="444" x2="86.0" y2="449" stroke="#444"/>
+<text x="86.0" y="466" text-anchor="middle" font-family="Arial" font-size="11">10000</text>
+<line x1="86.1" y1="444" x2="86.1" y2="449" stroke="#444"/>
+<text x="86.1" y="466" text-anchor="middle" font-family="Arial" font-size="11">100000</text>
+<line x1="86.8" y1="444" x2="86.8" y2="449" stroke="#444"/>
+<text x="86.8" y="466" text-anchor="middle" font-family="Arial" font-size="11">1000000</text>
+<line x1="94.1" y1="444" x2="94.1" y2="449" stroke="#444"/>
+<text x="94.1" y="466" text-anchor="middle" font-family="Arial" font-size="11">10000000</text>
+<line x1="166.6" y1="444" x2="166.6" y2="449" stroke="#444"/>
+<text x="166.6" y="466" text-anchor="middle" font-family="Arial" font-size="11">100000000</text>
+<line x1="892.0" y1="444" x2="892.0" y2="449" stroke="#444"/>
+<text x="892.0" y="466" text-anchor="middle" font-family="Arial" font-size="11">1000000000</text>
+<polyline points="86.0,82.6 86.0,61.0 86.0,106.0 86.1,72.9 86.8,54.0 94.1,80.7 166.6,108.2 892.0,64.7" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="86.0" cy="82.6" r="4" fill="#2563eb"/>
+<circle cx="86.0" cy="61.0" r="4" fill="#2563eb"/>
+<circle cx="86.0" cy="106.0" r="4" fill="#2563eb"/>
+<circle cx="86.1" cy="72.9" r="4" fill="#2563eb"/>
+<circle cx="86.8" cy="54.0" r="4" fill="#2563eb"/>
+<circle cx="94.1" cy="80.7" r="4" fill="#2563eb"/>
+<circle cx="166.6" cy="108.2" r="4" fill="#2563eb"/>
+<circle cx="892.0" cy="64.7" r="4" fill="#2563eb"/>
+<rect x="96" y="66" width="12" height="12" fill="#2563eb"/>
+<text x="114" y="76" font-family="Arial" font-size="12">Programacao dinamica</text>
+<polyline points="86.0,242.8 86.0,254.8 86.0,261.2 86.1,257.8 86.8,219.8 94.1,245.5 166.6,273.2 892.0,254.2" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+<circle cx="86.0" cy="242.8" r="4" fill="#dc2626"/>
+<circle cx="86.0" cy="254.8" r="4" fill="#dc2626"/>
+<circle cx="86.0" cy="261.2" r="4" fill="#dc2626"/>
+<circle cx="86.1" cy="257.8" r="4" fill="#dc2626"/>
+<circle cx="86.8" cy="219.8" r="4" fill="#dc2626"/>
+<circle cx="94.1" cy="245.5" r="4" fill="#dc2626"/>
+<circle cx="166.6" cy="273.2" r="4" fill="#dc2626"/>
+<circle cx="892.0" cy="254.2" r="4" fill="#dc2626"/>
+<rect x="96" y="86" width="12" height="12" fill="#dc2626"/>
+<text x="114" y="96" font-family="Arial" font-size="12">Backtracking</text>
+<polyline points="86.0,431.9 86.0,420.9 86.0,404.7 86.1,444.0 86.8,412.1 94.1,408.7 166.6,418.2 892.0,431.5" fill="none" stroke="#16a34a" stroke-width="2.5"/>
+<circle cx="86.0" cy="431.9" r="4" fill="#16a34a"/>
+<circle cx="86.0" cy="420.9" r="4" fill="#16a34a"/>
+<circle cx="86.0" cy="404.7" r="4" fill="#16a34a"/>
+<circle cx="86.1" cy="444.0" r="4" fill="#16a34a"/>
+<circle cx="86.8" cy="412.1" r="4" fill="#16a34a"/>
+<circle cx="94.1" cy="408.7" r="4" fill="#16a34a"/>
+<circle cx="166.6" cy="418.2" r="4" fill="#16a34a"/>
+<circle cx="892.0" cy="431.5" r="4" fill="#16a34a"/>
+<rect x="96" y="106" width="12" height="12" fill="#16a34a"/>
+<text x="114" y="116" font-family="Arial" font-size="12">Branch-and-bound</text>
+<text x="489.0" y="500" text-anchor="middle" font-family="Arial" font-size="13">Capacidade de volume (V)</text>
+<text x="18" y="249.0" text-anchor="middle" transform="rotate(-90 18 249.0)" font-family="Arial" font-size="13">Tempo medio (s, escala log)</text>
+</svg>

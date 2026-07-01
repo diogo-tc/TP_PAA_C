@@ -1,0 +1,4 @@
+N (Itens),Metodo,Lucro,Tempo (ms),Desvio (ms),IC 95% (ms)
+1000,Backtracking,"R$ 9.398,00","5972688,15",,0
+1000,BnB,"R$ 9.398,00","343263,70",,0
+1000,Dinamica,"R$ 8.758,50","440,41","58,72","81,38"

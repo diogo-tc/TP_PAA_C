@@ -1,0 +1,7 @@
+arquivo_csv,algoritmo,execucoes,tempo_medio,tempo_mediano,desvio_padrao_tempo,tempo_minimo,tempo_maximo
+CSV_100a1000.csv,dp,1417,"0,29","0,12","0,59","0,00077","7,9340"
+CSV_100a1000.csv,bt,1415,"94,8056","2,2256","494,0343","0,00031","9360,8015"
+CSV_100a1000.csv,bb,1414,"9,6263","0,29","55,8068","0,000069","985,1864"
+CSV_300itens_aumento_de_peso_e_volume.csv,dp,1080,"1,1365","0,34","3,5977","0,00067","76,7244"
+CSV_300itens_aumento_de_peso_e_volume.csv,bt,1080,"0,8","0,079","2,1094","0,00019","31,8471"
+CSV_300itens_aumento_de_peso_e_volume.csv,bb,1080,"0,11","0,017","0,26","0,000054","3,6615"

@@ -1,6 +1,7 @@
 import argparse
 import base64
 import html
+import math
 from pathlib import Path
 
 try:
@@ -13,10 +14,23 @@ except ImportError as exc:
 
 
 ALGORITHM_ORDER = ["dp", "bt", "bb"]
+PRESENTATION_ALGORITHM_ORDER = ["bt", "bb", "dp"]
 ALGORITHM_NAMES = {
     "dp": "Programacao dinamica",
     "bt": "Backtracking",
     "bb": "Branch-and-bound",
+}
+
+ALGORITHM_NAMES_PRESENTATION = {
+    "dp": "Dinamica",
+    "bt": "Backtracking",
+    "bb": "BnB",
+}
+
+ALGORITHM_COLORS = {
+    "dp": "#b6d7a8",
+    "bt": "#a4c2f4",
+    "bb": "#f9cb9c",
 }
 
 COLUMN_NAMES_PT_BR = {
@@ -103,6 +117,25 @@ def format_decimal_pt(value: float) -> str:
     return text.replace(".", ",")
 
 
+# Formata valores monetarios em reais no padrao brasileiro.
+def format_currency_pt(value: float) -> str:
+    text = f"{float(value):,.2f}"
+    text = text.replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {text}"
+
+
+# Formata valores em milissegundos para tabelas de apresentacao.
+def format_ms_pt(value: float) -> str:
+    if pd.isna(value):
+        return ""
+    value = float(value)
+    if value == 0:
+        return "0"
+    if abs(value) >= 1:
+        return f"{value:.2f}".replace(".", ",")
+    return format_decimal_pt(value)
+
+
 # Aplica a formatacao decimal apenas nas colunas indicadas para exportacao.
 def format_for_export(df: pd.DataFrame, decimal_columns: set[str]) -> pd.DataFrame:
     formatted = df.copy()
@@ -132,6 +165,8 @@ def load_data(paths: list[Path]) -> pd.DataFrame:
     df["algorithm"] = pd.Categorical(df["algorithm"], categories=ALGORITHM_ORDER, ordered=True)
     df["time_seconds"] = pd.to_numeric(df["time_seconds"], errors="coerce")
     df["profit"] = pd.to_numeric(df["profit"], errors="coerce")
+    if "status" in df.columns:
+        df = df[df["status"].fillna("ok") == "ok"]
     df = df.dropna(subset=["time_seconds", "profit"])
     return df
 
@@ -214,6 +249,132 @@ def save_tables(df: pd.DataFrame, out_dir: Path) -> dict[str, Path]:
         "winners": tables_dir / "fastest_by_combination.csv",
         "consistency": tables_dir / "profit_consistency.csv",
     }
+
+
+# Gera tabelas resumidas em formato adequado para apresentacao em slides.
+def save_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
+    presentation_dir = out_dir / "presentation_tables"
+    presentation_dir.mkdir(parents=True, exist_ok=True)
+    generated: list[Path] = []
+
+    for source, source_df in df.groupby("source_csv", observed=False):
+        table = (
+            source_df.groupby(["n", "algorithm"], observed=False)
+            .agg(
+                lucro_medio=("profit", "mean"),
+                tempo_medio_ms=("time_seconds", lambda values: values.mean() * 1000),
+                desvio_ms=("time_seconds", lambda values: values.std(ddof=1) * 1000),
+                amostras=("time_seconds", "count"),
+            )
+            .reset_index()
+        )
+        table["ic_95_ms"] = table.apply(
+            lambda row: 0.0 if pd.isna(row["desvio_ms"]) or row["amostras"] <= 1
+            else 1.96 * row["desvio_ms"] / math.sqrt(row["amostras"]),
+            axis=1,
+        )
+        table["algorithm"] = pd.Categorical(table["algorithm"], categories=PRESENTATION_ALGORITHM_ORDER, ordered=True)
+        table = table.sort_values(["n", "algorithm"])
+
+        display = pd.DataFrame({
+            "N (Itens)": table["n"],
+            "Metodo": table["algorithm"].map(ALGORITHM_NAMES_PRESENTATION),
+            "Lucro": table["lucro_medio"].map(format_currency_pt),
+            "Tempo (ms)": table["tempo_medio_ms"].map(format_ms_pt),
+            "Desvio (ms)": table["desvio_ms"].map(format_ms_pt),
+            "IC 95% (ms)": table["ic_95_ms"].map(format_ms_pt),
+        })
+
+        safe_source = Path(str(source)).stem
+        csv_path = presentation_dir / f"{safe_source}_tabela_apresentacao.csv"
+        svg_path = presentation_dir / f"{safe_source}_tabela_apresentacao.svg"
+        html_path = presentation_dir / f"{safe_source}_tabela_apresentacao.html"
+
+        display.to_csv(csv_path, index=False)
+        svg_path.write_text(presentation_table_svg(display, f"Tabela - Comparacao de Tempo e Lucro ({source})"), encoding="utf-8")
+        html_path.write_text(presentation_table_html(display, f"Tabela - Comparacao de Tempo e Lucro ({source})"), encoding="utf-8")
+        generated.extend([csv_path, svg_path, html_path])
+
+    return generated
+
+
+# Cria uma tabela visual em SVG com cores por metodo para uso em slides.
+def presentation_table_svg(table: pd.DataFrame, title: str) -> str:
+    columns = list(table.columns)
+    col_widths = [110, 170, 150, 145, 145, 145]
+    row_h = 34
+    header_h = 38
+    title_h = 44
+    width = sum(col_widths) + 2
+    height = title_h + header_h + len(table) * row_h + 2
+
+    svg = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        '<rect width="100%" height="100%" fill="white"/>',
+        f'<text x="{width / 2}" y="29" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">{html.escape(title)}</text>',
+    ]
+
+    y = title_h
+    x = 1
+    svg.append(f'<rect x="1" y="{y}" width="{width - 2}" height="{header_h}" fill="#bfbfbf" stroke="#222" stroke-width="1"/>')
+    for col, col_w in zip(columns, col_widths):
+        svg.append(f'<rect x="{x}" y="{y}" width="{col_w}" height="{header_h}" fill="#bfbfbf" stroke="#222" stroke-width="1"/>')
+        svg.append(f'<text x="{x + col_w / 2}" y="{y + 25}" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">{html.escape(col)}</text>')
+        x += col_w
+
+    for row_index, (_, row) in enumerate(table.iterrows()):
+        y = title_h + header_h + row_index * row_h
+        method = str(row["Metodo"])
+        method_key = {"Backtracking": "bt", "BnB": "bb", "Dinamica": "dp"}.get(method, "")
+        x = 1
+        for col, col_w in zip(columns, col_widths):
+            fill = ALGORITHM_COLORS.get(method_key, "white") if col == "Metodo" else "white"
+            svg.append(f'<rect x="{x}" y="{y}" width="{col_w}" height="{row_h}" fill="{fill}" stroke="#222" stroke-width="1"/>')
+            weight = "700" if col == "Metodo" else "400"
+            svg.append(f'<text x="{x + col_w / 2}" y="{y + 22}" text-anchor="middle" font-family="Arial" font-size="15" font-weight="{weight}">{html.escape(str(row[col]))}</text>')
+            x += col_w
+
+    svg.append("</svg>")
+    return "\n".join(svg)
+
+
+# Cria uma versao HTML da tabela visual para abrir no navegador ou copiar para slides.
+def presentation_table_html(table: pd.DataFrame, title: str) -> str:
+    rows = []
+    for _, row in table.iterrows():
+        method = str(row["Metodo"])
+        method_key = {"Backtracking": "bt", "BnB": "bb", "Dinamica": "dp"}.get(method, "")
+        cells = []
+        for col in table.columns:
+            style = ""
+            if col == "Metodo":
+                style = f' style="background:{ALGORITHM_COLORS.get(method_key, "white")}; font-weight:700;"'
+            cells.append(f"<td{style}>{html.escape(str(row[col]))}</td>")
+        rows.append("<tr>" + "".join(cells) + "</tr>")
+
+    headers = "".join(f"<th>{html.escape(col)}</th>" for col in table.columns)
+    return f"""<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>{html.escape(title)}</title>
+  <style>
+    body {{ font-family: Arial, sans-serif; margin: 24px; }}
+    h1 {{ text-align: center; font-size: 24px; }}
+    table {{ border-collapse: collapse; margin: 0 auto; font-size: 16px; }}
+    th {{ background: #bfbfbf; font-weight: 700; }}
+    th, td {{ border: 1px solid #222; padding: 7px 14px; text-align: center; }}
+  </style>
+</head>
+<body>
+  <h1>{html.escape(title)}</h1>
+  <table>
+    <thead><tr>{headers}</tr></thead>
+    <tbody>{''.join(rows)}</tbody>
+  </table>
+</body>
+</html>
+"""
 
 
 # Executa os testes estatisticos de Friedman e Wilcoxon quando o scipy esta disponivel.
@@ -500,7 +661,8 @@ def table_preview(path: Path, rows: int = 12) -> str:
 
 
 # Cria o dashboard HTML final com cards, tabelas e graficos embutidos.
-def save_dashboard(df: pd.DataFrame, out_dir: Path, table_paths: dict[str, Path], stats_path: Path, plot_paths: list[Path]) -> Path:
+def save_dashboard(df: pd.DataFrame, out_dir: Path, table_paths: dict[str, Path], stats_path: Path,
+                   plot_paths: list[Path], presentation_paths: list[Path]) -> Path:
     dashboard_path = out_dir / "dashboard.html"
     total_runs = len(df)
     csvs = ", ".join(sorted(map(str, df["source_csv"].unique())))
@@ -571,6 +733,7 @@ def save_dashboard(df: pd.DataFrame, out_dir: Path, table_paths: dict[str, Path]
     <li>{html.escape(str(table_paths["winners"]))}</li>
     <li>{html.escape(str(table_paths["consistency"]))}</li>
     <li>{html.escape(str(stats_path))}</li>
+    {''.join(f'<li>{html.escape(str(path))}</li>' for path in presentation_paths)}
   </ul>
 </body>
 </html>
@@ -606,12 +769,14 @@ def main() -> None:
     paths = resolve_inputs(args)
     df = load_data(paths)
     table_paths = save_tables(df, out_dir)
+    presentation_paths = save_presentation_tables(df, out_dir)
     stats_path = save_stats(df, out_dir)
     plot_paths = save_plots(df, out_dir)
-    dashboard_path = save_dashboard(df, out_dir, table_paths, stats_path, plot_paths)
+    dashboard_path = save_dashboard(df, out_dir, table_paths, stats_path, plot_paths, presentation_paths)
 
     print(f"CSVs analisados: {len(paths)}")
     print(f"Execucoes analisadas: {len(df)}")
+    print(f"Tabelas de apresentacao: {out_dir / 'presentation_tables'}")
     print(f"Dashboard: {dashboard_path}")
 
 

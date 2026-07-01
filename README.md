@@ -108,8 +108,10 @@ Quando `--seed` nao e informado, as instancias sao geradas aleatoriamente. O men
 O CSV gerado contem:
 
 ```txt
-n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit
+n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit,status
 ```
+
+Cada execucao de algoritmo tem limite de 2 horas. Se ultrapassar esse tempo, o processo e interrompido, a coluna `status` recebe `timeout`, e o runner continua para o proximo algoritmo ou instancia.
 
 ## Analise estatistica, graficos e dashboard
 

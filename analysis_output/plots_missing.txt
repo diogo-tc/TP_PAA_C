@@ -1,0 +1,3 @@
+Dependencias ausentes para graficos: matplotlib/seaborn.
+Foram gerados graficos SVG simplificados como fallback.
+Para graficos PNG mais elaborados, instale com: python -m pip install -r requirements.txt

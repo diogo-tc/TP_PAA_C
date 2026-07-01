@@ -8,7 +8,16 @@
 #ifdef _WIN32
 #define popen _popen
 #define pclose _pclose
+#else
+#include <sys/wait.h>
 #endif
+
+static constexpr int ALGORITHM_TIMEOUT_SECONDS = 7200;
+
+struct CommandResult {
+    std::string output;
+    int exitCode;
+};
 
 // Converte uma lista separada por virgulas em vetor de inteiros.
 static std::vector<int> parseList(const std::string &text) {
@@ -44,8 +53,23 @@ static void enterProjectRoot(const char *programPath) {
     }
 }
 
+// Converte o codigo bruto retornado por pclose no codigo de saida do processo.
+static int processExitCode(int status) {
+#ifdef _WIN32
+    return status;
+#else
+    if (WIFEXITED(status)) {
+        return WEXITSTATUS(status);
+    }
+    if (WIFSIGNALED(status)) {
+        return 128 + WTERMSIG(status);
+    }
+    return status;
+#endif
+}
+
 // Executa um comando e captura toda a saida padrao produzida por ele.
-static std::string runAndCapture(const std::string &command) {
+static CommandResult runAndCapture(const std::string &command) {
     FILE *pipe = popen(command.c_str(), "r");
     if (!pipe) {
         throw std::runtime_error("Falha ao executar: " + command);
@@ -58,10 +82,7 @@ static std::string runAndCapture(const std::string &command) {
     }
 
     int status = pclose(pipe);
-    if (status != 0) {
-        throw std::runtime_error("Comando falhou: " + command + "\n" + output);
-    }
-    return output;
+    return {output, processExitCode(status)};
 }
 
 // Extrai o lucro maximo da saida textual de um algoritmo.
@@ -212,7 +233,7 @@ int main(int argc, char **argv) {
             {"bb", "./build/mochila_bb"},
         };
 
-        csv << "n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit\n";
+        csv << "n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit,status\n";
         csv.flush();
         std::cout << "Diretorio atual: " << std::filesystem::current_path().string() << "\n";
         std::cout << "Gerando CSV em: " << outAbsolutePath.string() << "\n";
@@ -235,22 +256,40 @@ int main(int argc, char **argv) {
                         generateInstance(instancePath, n, w, v, seed);
 
                         for (const auto &algorithm : algorithms) {
-                            const std::string command = quote(algorithm.second) + " " + quote(instancePath);
-                            const std::string output = runAndCapture(command);
-                            const long long profit = parseProfit(output);
-                            const std::string chosenItems = parseChosenItems(output);
-                            const double seconds = parseTime(output);
+                            const std::string baseCommand = quote(algorithm.second) + " " + quote(instancePath);
+                            const std::string command = "timeout " + std::to_string(ALGORITHM_TIMEOUT_SECONDS)
+                                + "s " + baseCommand;
+                            const auto wallStart = std::chrono::steady_clock::now();
+                            const CommandResult result = runAndCapture(command);
+                            const auto wallEnd = std::chrono::steady_clock::now();
+
+                            std::string status = "ok";
+                            std::string profitText;
+                            std::string chosenItems;
+                            double seconds = elapsedSeconds(wallStart, wallEnd);
+
+                            if (result.exitCode == 124) {
+                                status = "timeout";
+                                seconds = ALGORITHM_TIMEOUT_SECONDS;
+                            } else if (result.exitCode != 0) {
+                                status = "error_" + std::to_string(result.exitCode);
+                            } else {
+                                const long long profit = parseProfit(result.output);
+                                profitText = std::to_string(profit);
+                                chosenItems = parseChosenItems(result.output);
+                                seconds = parseTime(result.output);
+                            }
 
                             csv << n << ',' << w << ',' << v << ',' << rep << ','
                                 << instancePath << ',' << algorithm.first
-                                << ',' << profit << ',' << csvText(chosenItems)
+                                << ',' << profitText << ',' << csvText(chosenItems)
                                 << ',' << std::fixed << std::setprecision(9)
-                                << seconds << ",seconds\n";
+                                << seconds << ",seconds," << status << '\n';
                             csv.flush();
 
                             std::cout << "n=" << n << " W=" << w << " V=" << v
                                       << " rep=" << rep << " alg=" << algorithm.first
-                                      << " tempo=" << seconds << "s\n";
+                                      << " tempo=" << seconds << "s status=" << status << "\n";
                         }
                     }
                 }

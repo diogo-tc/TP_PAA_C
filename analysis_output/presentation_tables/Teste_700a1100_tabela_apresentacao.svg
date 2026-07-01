@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="867" height="288" viewBox="0 0 867 288">
+<rect width="100%" height="100%" fill="white"/>
+<text x="433.5" y="29" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">Tabela - Comparacao de Tempo e Lucro (Teste_700a1100.csv)</text>
+<rect x="1" y="44" width="865" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<rect x="1" y="44" width="110" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">N (Itens)</text>
+<rect x="111" y="44" width="170" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">Metodo</text>
+<rect x="281" y="44" width="150" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">Lucro</text>
+<rect x="431" y="44" width="145" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">Tempo (ms)</text>
+<rect x="576" y="44" width="145" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">Desvio (ms)</text>
+<rect x="721" y="44" width="145" height="38" fill="#bfbfbf" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="69" text-anchor="middle" font-family="Arial" font-size="16" font-weight="700">IC 95% (ms)</text>
+<rect x="1" y="82" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">700</text>
+<rect x="111" y="82" width="170" height="34" fill="#a4c2f4" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">Backtracking</text>
+<rect x="281" y="82" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 8.738,40</text>
+<rect x="431" y="82" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">2614005,92</text>
+<rect x="576" y="82" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">2720350,51</text>
+<rect x="721" y="82" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="104" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">1686090,71</text>
+<rect x="1" y="116" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">700</text>
+<rect x="111" y="116" width="170" height="34" fill="#f9cb9c" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">BnB</text>
+<rect x="281" y="116" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 8.738,40</text>
+<rect x="431" y="116" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">383136,13</text>
+<rect x="576" y="116" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">345567,14</text>
+<rect x="721" y="116" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="138" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">214184,74</text>
+<rect x="1" y="150" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">700</text>
+<rect x="111" y="150" width="170" height="34" fill="#b6d7a8" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">Dinamica</text>
+<rect x="281" y="150" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 8.738,40</text>
+<rect x="431" y="150" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">4693,00</text>
+<rect x="576" y="150" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">1758,94</text>
+<rect x="721" y="150" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="172" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">1090,20</text>
+<rect x="1" y="184" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">800</text>
+<rect x="111" y="184" width="170" height="34" fill="#a4c2f4" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">Backtracking</text>
+<rect x="281" y="184" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 10.022,33</text>
+<rect x="431" y="184" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">6021482,90</text>
+<rect x="576" y="184" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">2547461,45</text>
+<rect x="721" y="184" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="206" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">2882724,01</text>
+<rect x="1" y="218" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">800</text>
+<rect x="111" y="218" width="170" height="34" fill="#f9cb9c" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">BnB</text>
+<rect x="281" y="218" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 10.034,50</text>
+<rect x="431" y="218" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">805789,41</text>
+<rect x="576" y="218" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">150657,94</text>
+<rect x="721" y="218" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="240" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">208801,26</text>
+<rect x="1" y="252" width="110" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="56.0" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">800</text>
+<rect x="111" y="252" width="170" height="34" fill="#b6d7a8" stroke="#222" stroke-width="1"/>
+<text x="196.0" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="700">Dinamica</text>
+<rect x="281" y="252" width="150" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="356.0" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">R$ 10.022,33</text>
+<rect x="431" y="252" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="503.5" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">4578,84</text>
+<rect x="576" y="252" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="648.5" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">546,22</text>
+<rect x="721" y="252" width="145" height="34" fill="white" stroke="#222" stroke-width="1"/>
+<text x="793.5" y="274" text-anchor="middle" font-family="Arial" font-size="15" font-weight="400">618,10</text>
+</svg>
