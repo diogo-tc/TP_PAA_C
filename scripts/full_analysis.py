@@ -136,6 +136,16 @@ def format_ms_pt(value: float) -> str:
     return format_decimal_pt(value)
 
 
+# Formata parametros inteiros da instancia sem casas decimais.
+def format_instance_size(value: float) -> str:
+    if pd.isna(value):
+        return ""
+    value = float(value)
+    if value.is_integer():
+        return str(int(value))
+    return format_decimal_pt(value)
+
+
 # Aplica a formatacao decimal apenas nas colunas indicadas para exportacao.
 def format_for_export(df: pd.DataFrame, decimal_columns: set[str]) -> pd.DataFrame:
     formatted = df.copy()
@@ -259,9 +269,8 @@ def save_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
 
     for source, source_df in df.groupby("source_csv", observed=False):
         table = (
-            source_df.groupby(["n", "algorithm"], observed=False)
+            source_df.groupby(["n", "W", "V", "algorithm"], observed=False)
             .agg(
-                lucro_medio=("profit", "mean"),
                 tempo_medio_ms=("time_seconds", lambda values: values.mean() * 1000),
                 desvio_ms=("time_seconds", lambda values: values.std(ddof=1) * 1000),
                 amostras=("time_seconds", "count"),
@@ -274,12 +283,13 @@ def save_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
             axis=1,
         )
         table["algorithm"] = pd.Categorical(table["algorithm"], categories=PRESENTATION_ALGORITHM_ORDER, ordered=True)
-        table = table.sort_values(["n", "algorithm"])
+        table = table.sort_values(["n", "W", "V", "algorithm"])
 
         display = pd.DataFrame({
-            "N (Itens)": table["n"],
+            "N (Itens)": table["n"].map(format_instance_size),
+            "Peso (W)": table["W"].map(format_instance_size),
+            "Volume (V)": table["V"].map(format_instance_size),
             "Metodo": table["algorithm"].map(ALGORITHM_NAMES_PRESENTATION),
-            "Lucro": table["lucro_medio"].map(format_currency_pt),
             "Tempo (ms)": table["tempo_medio_ms"].map(format_ms_pt),
             "Desvio (ms)": table["desvio_ms"].map(format_ms_pt),
             "IC 95% (ms)": table["ic_95_ms"].map(format_ms_pt),
@@ -291,9 +301,63 @@ def save_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
         html_path = presentation_dir / f"{safe_source}_tabela_apresentacao.html"
 
         display.to_csv(csv_path, index=False)
-        svg_path.write_text(presentation_table_svg(display, f"Tabela - Comparacao de Tempo e Lucro ({source})"), encoding="utf-8")
-        html_path.write_text(presentation_table_html(display, f"Tabela - Comparacao de Tempo e Lucro ({source})"), encoding="utf-8")
+        title = f"Tabela - Comparacao por Tamanho da Instancia ({source})"
+        svg_path.write_text(presentation_table_svg(display, title), encoding="utf-8")
+        html_path.write_text(presentation_table_html(display, title), encoding="utf-8")
         generated.extend([csv_path, svg_path, html_path])
+
+    return generated
+
+
+# Gera tabelas compactas para slides, resumindo uma dimensao por vez.
+def save_compact_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
+    presentation_dir = out_dir / "presentation_tables"
+    presentation_dir.mkdir(parents=True, exist_ok=True)
+    generated: list[Path] = []
+
+    dimensions = [
+        ("n", "N (Itens)", "por_itens"),
+        ("W", "Peso (W)", "por_peso"),
+        ("V", "Volume (V)", "por_volume"),
+    ]
+
+    for source, source_df in df.groupby("source_csv", observed=False):
+        safe_source = Path(str(source)).stem
+        for group_col, label, suffix in dimensions:
+            table = (
+                source_df.groupby([group_col, "algorithm"], observed=False)
+                .agg(
+                    tempo_medio_ms=("time_seconds", lambda values: values.mean() * 1000),
+                    desvio_ms=("time_seconds", lambda values: values.std(ddof=1) * 1000),
+                    amostras=("time_seconds", "count"),
+                )
+                .reset_index()
+            )
+            table["ic_95_ms"] = table.apply(
+                lambda row: 0.0 if pd.isna(row["desvio_ms"]) or row["amostras"] <= 1
+                else 1.96 * row["desvio_ms"] / math.sqrt(row["amostras"]),
+                axis=1,
+            )
+            table["algorithm"] = pd.Categorical(table["algorithm"], categories=PRESENTATION_ALGORITHM_ORDER, ordered=True)
+            table = table.sort_values([group_col, "algorithm"])
+
+            display = pd.DataFrame({
+                label: table[group_col].map(format_instance_size),
+                "Metodo": table["algorithm"].map(ALGORITHM_NAMES_PRESENTATION),
+                "Tempo (ms)": table["tempo_medio_ms"].map(format_ms_pt),
+                "Desvio (ms)": table["desvio_ms"].map(format_ms_pt),
+                "IC 95% (ms)": table["ic_95_ms"].map(format_ms_pt),
+            })
+
+            csv_path = presentation_dir / f"{safe_source}_tabela_slide_{suffix}.csv"
+            svg_path = presentation_dir / f"{safe_source}_tabela_slide_{suffix}.svg"
+            html_path = presentation_dir / f"{safe_source}_tabela_slide_{suffix}.html"
+            title = f"Tabela - Tempo medio {label} ({source})"
+
+            display.to_csv(csv_path, index=False)
+            svg_path.write_text(presentation_table_svg(display, title), encoding="utf-8")
+            html_path.write_text(presentation_table_html(display, title), encoding="utf-8")
+            generated.extend([csv_path, svg_path, html_path])
 
     return generated
 
@@ -301,7 +365,16 @@ def save_presentation_tables(df: pd.DataFrame, out_dir: Path) -> list[Path]:
 # Cria uma tabela visual em SVG com cores por metodo para uso em slides.
 def presentation_table_svg(table: pd.DataFrame, title: str) -> str:
     columns = list(table.columns)
-    col_widths = [110, 170, 150, 145, 145, 145]
+    default_widths = {
+        "N (Itens)": 105,
+        "Peso (W)": 115,
+        "Volume (V)": 120,
+        "Metodo": 155,
+        "Tempo (ms)": 135,
+        "Desvio (ms)": 135,
+        "IC 95% (ms)": 135,
+    }
+    col_widths = [default_widths.get(col, 130) for col in columns]
     row_h = 34
     header_h = 38
     title_h = 44
@@ -396,37 +469,47 @@ def save_stats(df: pd.DataFrame, out_dir: Path) -> Path:
     rows = []
     for keys, group in df.groupby(["source_csv", "n", "W", "V"], observed=False):
         pivot = group.pivot_table(index="rep", columns="algorithm", values="time_seconds", observed=False)
-        pivot = pivot.dropna(subset=ALGORITHM_ORDER)
-        if len(pivot) < 2:
+        source_csv, n, w, v = keys
+
+        available_algorithms = [alg for alg in ALGORITHM_ORDER if alg in pivot.columns]
+        if len(available_algorithms) < 2:
             continue
 
-        stat, pvalue = friedmanchisquare(pivot["dp"], pivot["bt"], pivot["bb"])
-        source_csv, n, w, v = keys
-        rows.append({
-            "source_csv": source_csv,
-            "n": n,
-            "W": w,
-            "V": v,
-            "test": "friedman",
-            "comparison": "dp_vs_bt_vs_bb",
-            "statistic": stat,
-            "p_value": pvalue,
-            "significant_0_05": pvalue < 0.05,
-        })
+        complete = pivot.dropna(subset=available_algorithms)
+        if len(complete) < 2:
+            continue
 
-        for a, b in [("dp", "bt"), ("dp", "bb"), ("bt", "bb")]:
-            stat, pvalue = wilcoxon(pivot[a], pivot[b], zero_method="zsplit")
+        if len(available_algorithms) >= 3:
+            stat, pvalue = friedmanchisquare(*(complete[alg] for alg in available_algorithms))
             rows.append({
                 "source_csv": source_csv,
                 "n": n,
                 "W": w,
                 "V": v,
-                "test": "wilcoxon",
-                "comparison": f"{a}_vs_{b}",
+                "test": "friedman",
+                "comparison": "_vs_".join(available_algorithms),
                 "statistic": stat,
                 "p_value": pvalue,
                 "significant_0_05": pvalue < 0.05,
             })
+
+        for i, a in enumerate(available_algorithms):
+            for b in available_algorithms[i + 1:]:
+                pair = pivot[[a, b]].dropna()
+                if len(pair) < 2:
+                    continue
+                stat, pvalue = wilcoxon(pair[a], pair[b], zero_method="zsplit")
+                rows.append({
+                    "source_csv": source_csv,
+                    "n": n,
+                    "W": w,
+                    "V": v,
+                    "test": "wilcoxon",
+                    "comparison": f"{a}_vs_{b}",
+                    "statistic": stat,
+                    "p_value": pvalue,
+                    "significant_0_05": pvalue < 0.05,
+                })
 
     to_pt_br(pd.DataFrame(rows)).to_csv(out_path, index=False)
     return out_path
@@ -770,6 +853,7 @@ def main() -> None:
     df = load_data(paths)
     table_paths = save_tables(df, out_dir)
     presentation_paths = save_presentation_tables(df, out_dir)
+    presentation_paths.extend(save_compact_presentation_tables(df, out_dir))
     stats_path = save_stats(df, out_dir)
     plot_paths = save_plots(df, out_dir)
     dashboard_path = save_dashboard(df, out_dir, table_paths, stats_path, plot_paths, presentation_paths)

@@ -139,6 +139,25 @@ static void runCsvExperiment() {
     runCommand(command);
 }
 
+// Gera CSV executando apenas programacao dinamica e branch-and-bound.
+static void runCsvExperimentDpAndBranchBound() {
+    std::cout << "Use listas separadas por virgula para testar varias combinacoes.\n";
+    std::cout << "Serao geradas 10 instancias aleatorias para cada combinacao n x W x V.\n";
+    std::cout << "Apenas DP e Branch-and-bound serao executados.\n";
+    const std::string nValues = readText("Quantidades de itens", "10,20,30");
+    const std::string wValues = readText("Pesos maximos W", "50,100");
+    const std::string vValues = readText("Volumes maximos V", "50,100");
+    const std::string output = readText("CSV de saida", "results/resultados_dp_bb.csv");
+
+    std::string command = "./build/run_experiments --n " + quote(nValues)
+        + " --w " + quote(wValues)
+        + " --v " + quote(vValues)
+        + " --reps 10"
+        + " --algorithms dp,bb"
+        + " --out " + quote(output);
+    runCommand(command);
+}
+
 // Mostra as opcoes principais da interface de terminal.
 static void printMenu() {
     std::cout << "========================================\n";
@@ -148,6 +167,7 @@ static void printMenu() {
     std::cout << "2. Rodar um algoritmo\n";
     std::cout << "3. Rodar os tres algoritmos\n";
     std::cout << "4. Rodar experimento e gerar CSV\n";
+    std::cout << "5. Gerar CSV apenas com DP e Branch-and-bound\n";
     std::cout << "0. Sair\n";
 }
 
@@ -174,6 +194,9 @@ int main(int argc, char **argv) {
                 break;
             case 4:
                 runCsvExperiment();
+                break;
+            case 5:
+                runCsvExperimentDpAndBranchBound();
                 break;
             case 0:
                 return 0;

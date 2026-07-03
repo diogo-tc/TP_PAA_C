@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <limits>
 #include <random>
+#include <set>
 
 #ifdef _WIN32
 #define popen _popen
@@ -12,7 +13,7 @@
 #include <sys/wait.h>
 #endif
 
-static constexpr int ALGORITHM_TIMEOUT_SECONDS = 7200;
+static constexpr int DEFAULT_ALGORITHM_TIMEOUT_SECONDS = 7200;
 
 struct CommandResult {
     std::string output;
@@ -31,6 +32,22 @@ static std::vector<int> parseList(const std::string &text) {
     }
     if (values.empty()) {
         throw std::runtime_error("Lista vazia: " + text);
+    }
+    return values;
+}
+
+// Converte uma lista separada por virgulas em conjunto de textos.
+static std::set<std::string> parseTextSet(const std::string &text) {
+    std::set<std::string> values;
+    std::stringstream ss(text);
+    std::string part;
+    while (std::getline(ss, part, ',')) {
+        if (!part.empty()) {
+            values.insert(part);
+        }
+    }
+    if (values.empty()) {
+        throw std::runtime_error("Lista de algoritmos vazia: " + text);
     }
     return values;
 }
@@ -66,6 +83,11 @@ static int processExitCode(int status) {
     }
     return status;
 #endif
+}
+
+// Identifica codigos normalmente retornados quando o comando e interrompido por timeout.
+static bool isTimeoutExitCode(int exitCode) {
+    return exitCode == 124 || exitCode == 137 || exitCode == 143;
 }
 
 // Executa um comando e captura toda a saida padrao produzida por ele.
@@ -173,7 +195,8 @@ static void generateInstance(const std::string &path, int n, int w, int v, unsig
 // Exibe o modo de uso do runner de experimentos.
 static void usage(const char *program) {
     std::cerr
-        << "Uso: " << program << " --n 10,20 --w 50,100 --v 50,100 --out resultados.csv [--reps 10] [--seed 123]\n";
+        << "Uso: " << program << " --n 10,20 --w 50,100 --v 50,100 --out resultados.csv"
+        << " [--reps 10] [--seed 123] [--timeout 7200] [--algorithms dp,bt,bb]\n";
 }
 
 // Processa os parametros, gera instancias, executa algoritmos e grava o CSV.
@@ -183,7 +206,9 @@ int main(int argc, char **argv) {
     }
 
     std::string nText, wText, vText, outPath = "results/resultados.csv";
+    std::string algorithmsText = "dp,bt,bb";
     int reps = 10;
+    int timeoutSeconds = DEFAULT_ALGORITHM_TIMEOUT_SECONDS;
     unsigned baseSeed = std::random_device{}();
 
     for (int i = 1; i < argc; ++i) {
@@ -201,13 +226,15 @@ int main(int argc, char **argv) {
         else if (arg == "--reps") reps = std::stoi(requireValue(arg));
         else if (arg == "--out") outPath = requireValue(arg);
         else if (arg == "--seed") baseSeed = static_cast<unsigned>(std::stoul(requireValue(arg)));
+        else if (arg == "--timeout") timeoutSeconds = std::stoi(requireValue(arg));
+        else if (arg == "--algorithms") algorithmsText = requireValue(arg);
         else {
             usage(argv[0]);
             return 1;
         }
     }
 
-    if (nText.empty() || wText.empty() || vText.empty() || reps <= 0) {
+    if (nText.empty() || wText.empty() || vText.empty() || reps <= 0 || timeoutSeconds <= 0) {
         usage(argv[0]);
         return 1;
     }
@@ -216,6 +243,7 @@ int main(int argc, char **argv) {
         std::vector<int> nValues = parseList(nText);
         std::vector<int> wValues = parseList(wText);
         std::vector<int> vValues = parseList(vText);
+        const std::set<std::string> selectedAlgorithms = parseTextSet(algorithmsText);
 
         const std::filesystem::path outAbsolutePath = std::filesystem::absolute(outPath);
         const std::filesystem::path outParent = outAbsolutePath.parent_path();
@@ -233,10 +261,17 @@ int main(int argc, char **argv) {
             {"bb", "./build/mochila_bb"},
         };
 
+        for (const std::string &algorithm : selectedAlgorithms) {
+            if (algorithm != "dp" && algorithm != "bt" && algorithm != "bb") {
+                throw std::runtime_error("Algoritmo invalido em --algorithms: " + algorithm);
+            }
+        }
+
         csv << "n,W,V,rep,instance,algorithm,profit,chosen_items,time_seconds,time_unit,status\n";
         csv.flush();
         std::cout << "Diretorio atual: " << std::filesystem::current_path().string() << "\n";
         std::cout << "Gerando CSV em: " << outAbsolutePath.string() << "\n";
+        std::cout << "Timeout por algoritmo: " << timeoutSeconds << "s\n";
 
         for (int n : nValues) {
             for (int w : wValues) {
@@ -256,9 +291,12 @@ int main(int argc, char **argv) {
                         generateInstance(instancePath, n, w, v, seed);
 
                         for (const auto &algorithm : algorithms) {
+                            if (!selectedAlgorithms.count(algorithm.first)) {
+                                continue;
+                            }
                             const std::string baseCommand = quote(algorithm.second) + " " + quote(instancePath);
-                            const std::string command = "timeout " + std::to_string(ALGORITHM_TIMEOUT_SECONDS)
-                                + "s " + baseCommand;
+                            const std::string command = "timeout --kill-after=10s "
+                                + std::to_string(timeoutSeconds) + "s " + baseCommand;
                             const auto wallStart = std::chrono::steady_clock::now();
                             const CommandResult result = runAndCapture(command);
                             const auto wallEnd = std::chrono::steady_clock::now();
@@ -268,9 +306,9 @@ int main(int argc, char **argv) {
                             std::string chosenItems;
                             double seconds = elapsedSeconds(wallStart, wallEnd);
 
-                            if (result.exitCode == 124) {
+                            if (isTimeoutExitCode(result.exitCode)) {
                                 status = "timeout";
-                                seconds = ALGORITHM_TIMEOUT_SECONDS;
+                                seconds = timeoutSeconds;
                             } else if (result.exitCode != 0) {
                                 status = "error_" + std::to_string(result.exitCode);
                             } else {
